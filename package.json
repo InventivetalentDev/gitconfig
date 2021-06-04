@@ -1,0 +1,25 @@
+{
+  "name": "@inventivetalent/gitconfig",
+  "version": "1.0.0",
+  "description": "Load JSON configs from remote files",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "typings": "dist/index",
+  "author": {
+    "name": "Haylee Schäfer",
+    "email": "mail@inventivetalent.org",
+    "url": "https://inventivetalent.dev"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "compile": "tsc",
+    "build": "npm run clean && npm run compile"
+  },
+  "dependencies": {
+    "axios": "^0.21.1"
+  },
+  "devDependencies": {
+    "@types/node": "^15.12.0",
+    "typescript": "^4.3.2"
+  }
+}
