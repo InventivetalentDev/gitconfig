@@ -38,6 +38,23 @@ export class GitConfig<C> {
         });
     }
 
+    /**
+     * Invalidate all known configs
+     * returns false if any of the configs failed to invalidate
+     */
+    public static invalidateAll(): Promise<boolean> {
+        let promises: Promise<boolean>[] = [];
+        GitConfig.configs.forEach(v => {
+            promises.push(v.invalidate());
+        })
+        return Promise.all(promises).then(results => {
+            for (let r of results) {
+                if (!r) return false;
+            }
+            return true;
+        });
+    }
+
     /// ============================================= ///
 
     private readonly file: string;
