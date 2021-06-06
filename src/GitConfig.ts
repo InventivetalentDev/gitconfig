@@ -1,7 +1,13 @@
 import { join } from "path";
-import axios, { AxiosInstance } from "axios";
+import { writeFile, readFile } from "fs/promises";
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 
 export class GitConfig<C> {
+
+    /**
+     * Log all errors instead of suppressing them
+     */
+    static debug: boolean = false;
 
     /**
      * Axios instance used for requesting the config files
@@ -16,6 +22,12 @@ export class GitConfig<C> {
      * Source root for config files
      */
     static source: string = "";
+    /**
+     * Local destination for config files
+     * If this is set, it downloads all config files locally and attempts to read them from the local file before downloading
+     * defaults to undefined = don't download
+     */
+    static local?: string = undefined;
 
     private static readonly configs: Map<string, GitConfig<any>> = new Map<string, GitConfig<any>>();
 
@@ -32,7 +44,11 @@ export class GitConfig<C> {
             // use existing
             return config;
         }
-        config = new GitConfig<any>(fullFile);
+        config = new GitConfig<any>(file, source);
+        if (GitConfig.local) {
+            // Attempt to read the local version
+            await config.readLocalFile();
+        }
         return config.invalidate().then(ignored => {
             return config as GitConfig<C>;
         });
@@ -58,11 +74,19 @@ export class GitConfig<C> {
     /// ============================================= ///
 
     private readonly file: string;
-    private content: C;
+    private readonly source: string;
+    private readonly fullFile: string;
+    private _content: C;
 
-    private constructor(file: string) {
+    private constructor(file: string, source: string) {
         this.file = file;
-        this.content = <any>{};
+        this.source = source;
+        this.fullFile = join(source, file);
+        this._content = <any>{};
+    }
+
+    public get content(): C {
+        return this._content;
     }
 
     /**
@@ -72,24 +96,55 @@ export class GitConfig<C> {
     public async invalidate(): Promise<boolean> {
         return GitConfig.axiosInstance.request({
             url: this.file
-        }).then(res => {
-            if (Math.floor(res.status / 100) !== 2) {
-                return false;
-            }
-            const data = res.data;
-            let json: any = {};
-            if (typeof data === "object") {
-                json = data;
-            } else if (typeof data === "string") {
-                json = JSON.parse(data as string);
-            } else {
-                console.warn("[GitConfig] Don't know what to do with response of type " + (typeof data));
-                return false;
-            }
-            this.content = json;
-            return true;
         })
+            .then(this.handleContentResponse)
+            .catch(err => {
+                if (!GitConfig.debug && (err.response || err.request)) {
+                    return false;
+                }
+                throw err;
+            })
     }
 
+    private async handleContentResponse(res: AxiosResponse): Promise<boolean> {
+        if (Math.floor(res.status / 100) !== 2) {
+            return false;
+        }
+        const data = res.data;
+        let json: any = {};
+        if (typeof data === "object") {
+            json = data;
+        } else if (typeof data === "string") {
+            json = JSON.parse(data as string);
+        } else {
+            console.warn("[GitConfig] Don't know what to do with response of type " + (typeof data));
+            return false;
+        }
+        this._content = json;
+        if (GitConfig.local) {
+            await this.writeLocalFile();
+        }
+        return true;
+    }
+
+    private async readLocalFile(): Promise<void> {
+        this._content = await readFile(join(GitConfig.local!, this.file), "utf8")
+            .then(c => JSON.parse(c))
+            .catch(err => {
+                if (!GitConfig.debug) {
+                    return <any>{}
+                }
+                throw err;
+            });
+    }
+
+    private async writeLocalFile(): Promise<void> {
+        return writeFile(join(GitConfig.local!, this.file), JSON.stringify(this._content), "utf8")
+            .catch(err => {
+                if (GitConfig.debug) {
+                    throw err;
+                }
+            })
+    }
 
 }
