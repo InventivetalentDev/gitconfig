@@ -1,6 +1,6 @@
 {
   "name": "@inventivetalent/gitconfig",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Load JSON configs from remote files",
   "license": "MIT",
   "main": "dist/index.js",
