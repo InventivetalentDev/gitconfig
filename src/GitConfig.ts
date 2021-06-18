@@ -144,7 +144,7 @@ export class GitConfig<C> {
     }
 
     private async writeLocalFile(): Promise<void> {
-        return writeFile(join(GitConfig.local!, this.file), JSON.stringify(this._content), "utf8")
+        return writeFile(join(GitConfig.local!, this.file), JSON.stringify(this._content, null, 2), "utf8")
             .catch(err => {
                 if (GitConfig.debug) {
                     throw err;
