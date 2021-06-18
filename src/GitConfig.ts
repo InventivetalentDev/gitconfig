@@ -1,7 +1,7 @@
-import { join } from "path";
 import { writeFile, readFile } from "fs/promises";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import merge from "ts-deepmerge";
+import { join } from "path";
 
 export class GitConfig<C> {
 
@@ -39,7 +39,7 @@ export class GitConfig<C> {
      * @param source (optional) file source root, defaults to GitConfig#source
      */
     public static async get<C>(file: string, source: string = GitConfig.source): Promise<GitConfig<C>> {
-        const fullFile = join(source, file);
+        const fullFile = new URL(file, source).href;
         let config = GitConfig.configs.get(fullFile);
         if (config) {
             // use existing
@@ -82,7 +82,7 @@ export class GitConfig<C> {
     private constructor(file: string, source: string) {
         this.file = file;
         this.source = source;
-        this.fullFile = join(source, file);
+        this.fullFile = new URL(file, source).href;
         this._content = <any>{};
     }
 
