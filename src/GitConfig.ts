@@ -89,6 +89,10 @@ export class GitConfig<C> {
         return this._content;
     }
 
+    public mergedWith(other: any): C {
+        return { ...this.content, ...other } as C;
+    }
+
     /**
      * Invalidate this config and refresh its contents
      * returns true if the file was successfully loaded and parsed (may reject the promise on errors)
