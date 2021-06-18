@@ -102,13 +102,13 @@ export class GitConfig<C> {
         return GitConfig.axiosInstance.request({
             url: this.fullFile
         })
-            .then(this.handleContentResponse)
+            .then(res => this.handleContentResponse(res))
             .catch(err => {
                 if (!GitConfig.debug && (err.response || err.request)) {
                     return false;
                 }
                 throw err;
-            })
+            });
     }
 
     private async handleContentResponse(res: AxiosResponse): Promise<boolean> {
