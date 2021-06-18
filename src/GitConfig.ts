@@ -100,7 +100,7 @@ export class GitConfig<C> {
      */
     public async invalidate(): Promise<boolean> {
         return GitConfig.axiosInstance.request({
-            url: this.file
+            url: this.fullFile
         })
             .then(this.handleContentResponse)
             .catch(err => {
