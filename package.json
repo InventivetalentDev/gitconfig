@@ -16,7 +16,8 @@
     "build": "npm run clean && npm run compile"
   },
   "dependencies": {
-    "axios": "^0.21.1"
+    "axios": "^0.21.1",
+    "ts-deepmerge": "^1.0.8"
   },
   "devDependencies": {
     "@types/node": "^15.12.0",
