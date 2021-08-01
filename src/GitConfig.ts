@@ -46,6 +46,7 @@ export class GitConfig<C> {
             return config;
         }
         config = new GitConfig<any>(file, source);
+        GitConfig.configs.set(fullFile, config);
         if (GitConfig.local) {
             // Attempt to read the local version
             await config.readLocalFile();
