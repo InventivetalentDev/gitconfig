@@ -1,7 +1,7 @@
-import { writeFile, readFile } from "fs/promises";
-import axios, { AxiosInstance, AxiosResponse } from "axios";
-import merge from "ts-deepmerge";
-import { join } from "path";
+import {writeFile, readFile} from "fs/promises";
+import axios, {AxiosInstance, AxiosResponse} from "axios";
+import {merge} from "ts-deepmerge";
+import {join} from "path";
 
 export class GitConfig<C> {
 
@@ -92,7 +92,7 @@ export class GitConfig<C> {
     }
 
     public mergedWith(other: any): C {
-        return merge({}, this.content, other) as C;
+        return merge({}, this.content, other as C) as C;
     }
 
     /**
